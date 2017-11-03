@@ -112,6 +112,7 @@ func GenDAO(dalgen* DalgenConfig, schema *TableSchema) {
 	for _, v := range dalgen.Ops {
 		stmt, err := sqlparser.Parse(v.Sql)
 		if err != nil {
+			glog.Error("sql: ", v.Sql, ", error: ", err)
 			// fmt.Println(err)
 			// t.Error(err)
 			continue

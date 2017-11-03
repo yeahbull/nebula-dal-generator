@@ -23,41 +23,37 @@ import(
 	"github.com/golang/glog"
 )
 
-type {{.Name}}DAO struct {
+type AuthSaltsDAO struct {
 	db *sqlx.DB
 }
 
-func New{{.Name}}DAO(db* sqlx.DB) *{{.Name}}DAO {
-	return &{{.Name}}DAO{db}
+func NewAuthSaltsDAO(db* sqlx.DB) *AuthSaltsDAO {
+	return &AuthSaltsDAO{db}
 }
 
-{{range $i, $v := .Funcs }}
-{{if eq .QueryType "INSERT"}}
-{{template "INSERT" $v}}
-{{else if eq .QueryType "SELECT"}}
-{{template "SELECT" $v}}
-{{end}}
-{{end}}
 
-{{define "INSERT"}}
-func (dao *{{.TableName}}DAO) {{.FuncName}}(do *do.{{.TableName}}DO) (id int64, err error) {
+
+
+func (dao *AuthSaltsDAO) Insert(do *do.AuthSaltsDO) (id int64, err error) {
 	// TODO(@benqi): sqlmap
-	var sql = "{{.Sql}}"
+	var sql = "insert into auth_salts(auth_id, salt) values (:auth_id, :salt)"
 	r, err := dao.db.NamedExec(sql, do)
 	if err != nil {
-		glog.Error("{{.TableName}}DAO/{{.FuncName}} error: ", err)
+		glog.Error("AuthSaltsDAO/Insert error: ", err)
 		return 0, nil
 	}
 
 	return r.LastInsertId()
 }
-{{end}}
 
-{{define "SELECT"}}
-func (dao *{{.TableName}}DAO) {{.FuncName}}({{ range $i, $v := .Params }} {{if ne $i 0 }} , {{end}} {{.FieldName}} {{.Type}} {{end}}) (*do.{{.TableName}}DO, error) {
+
+
+
+
+func (dao *AuthSaltsDAO) SelectByAuthId(  auth_id int64 ) (*do.AuthSaltsDO, error) {
 	// TODO(@benqi): sqlmap
-	var sql = "{{.Sql}}"
-	do := &do.{{.TableName}}DO{ {{ range $i, $v := .Params }} {{.Name}} : {{.FieldName}}, {{end}} }
+	var sql = "select auth_id, salt from auth_salts where auth_id = :auth_id"
+	do := &do.AuthSaltsDO{  AuthId : auth_id,  }
 	r, err := dao.db.NamedQuery(sql, do)
 	if err != nil {
 		glog.Error("AppsDAO/SelectById error: ", err)
@@ -76,10 +72,14 @@ func (dao *{{.TableName}}DAO) {{.FuncName}}({{ range $i, $v := .Params }} {{if n
 
 	return do, nil
 }
-{{end}}
 
-{{define "UPDATE"}}
-{{end}}
 
-{{define "DELETE"}}
-{{end}}
+
+
+
+
+
+
+
+
+
