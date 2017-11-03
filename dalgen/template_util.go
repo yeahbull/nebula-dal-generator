@@ -23,6 +23,7 @@ import (
 	"github.com/xwb1989/sqlparser"
 	"bytes"
 	"io/ioutil"
+	"github.com/golang/glog"
 )
 
 //Id        int32		`db:"id"`
@@ -37,7 +38,7 @@ type TemplateDO struct {
 	Fields []TemplateField
 }
 
-func GenDataObject(schema *TableSchema) {
+func GenDataObject(dalgen* DalgenConfig, schema *TableSchema) {
 	do := TemplateDO{}
 
 	do.Name = ToCamel(schema.Name)
@@ -49,14 +50,17 @@ func GenDataObject(schema *TableSchema) {
 		do.Fields  = append(do.Fields, f)
 	}
 
-	t := template.Must(template.ParseFiles("./do.tpl"))
+	// glog.Info(do)
+	t := template.Must(template.ParseFiles("./tpl/gen_do.tpl"))
 	// fmt.Println(t.Name())
 	// t.Execute(os.Stdout, do)
 
 	var buf bytes.Buffer
 	t.Execute(&buf, do)
-	ioutil.WriteFile(fmt.Sprintf("./%s_do.go", schema.Name), buf.Bytes(), 0666)
-
+	err := ioutil.WriteFile(fmt.Sprintf("./%s/dataobject/%s_do.go", dalgen.FilePath, schema.Name), buf.Bytes(), 0666)
+	if err != nil {
+		glog.Fatal("GenDAO error: ", err)
+	}
 }
 
 //func (dao *AppsDAO) Insert(do *do.AppsDO) (id int32, err error) {
@@ -102,8 +106,6 @@ type TemplateDAO struct {
 
 
 func GenDAO(dalgen* DalgenConfig, schema *TableSchema) {
-	// dalgen.Ops
-
 	dao := TemplateDAO{}
 	dao.Name = ToCamel(schema.Name)
 
@@ -152,9 +154,12 @@ func GenDAO(dalgen* DalgenConfig, schema *TableSchema) {
 	// f3, _ := file.Create(fmt.Sprintf("./%s_dao.go", dao.Name))
 
 	var buf bytes.Buffer
-	t := template.Must(template.ParseFiles("./dao.tpl"))
+	t := template.Must(template.ParseFiles("./tpl/gen_dao.tpl"))
 	// fmt.Println(t.Name())
 	// b := bytes.Buffer{}
 	t.Execute(&buf, dao)
-	ioutil.WriteFile(fmt.Sprintf("./%s_dao.go", schema.Name), buf.Bytes(), 0666)
+	err := ioutil.WriteFile(fmt.Sprintf("./%s/dao/%s_dao.go", dalgen.FilePath, schema.Name), buf.Bytes(), 0666)
+	if err != nil {
+		glog.Fatal("GenDAO error: ", err)
+	}
 }

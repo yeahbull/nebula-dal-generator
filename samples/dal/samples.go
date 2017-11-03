@@ -15,14 +15,32 @@
  * limitations under the License.
  */
 
-package dataobject
+package main
 
-type AppsDO struct {
-	Id        int32  `db:"id"`
-	ApiId     int32  `db:"api_id"`
-	ApiHash   string `db:"api_hash"`
-	Title     string `db:"title"`
-	ShortName string `db:"short_name"`
-	CreatedAt string `db:"created_at"`
-	DeletedAt string `db:"deleted_at"`
+import (
+	_ "github.com/go-sql-driver/mysql" // import your used driver
+	"github.com/jmoiron/sqlx"
+	"github.com/golang/glog"
+	dao2 "github.com/nebulaim/nebula-dal-generator/samples/dal/dao"
+	"flag"
+)
+
+func init() {
+	flag.Set("alsologtostderr", "true")
+	flag.Set("log_dir", "false")
+}
+
+func main() {
+	flag.Parse()
+
+	// 数据库
+	db, err := sqlx.Connect("mysql", "root:@/nebulaim?charset=utf8")
+	if err != nil {
+		glog.Error("Connect database error: ", err)
+		return
+	}
+
+	dao := dao2.NewAppsDAO(db)
+	do, _ := dao.SelectById(1)
+	glog.Info(do)
 }

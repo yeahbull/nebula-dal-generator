@@ -17,13 +17,7 @@
 
 package dataobject
 
-type AppsDO struct {
-     Id int32 `db:"Id"`
- ApiId int32 `db:"ApiId"`
- ApiHash string `db:"ApiHash"`
- Title string `db:"Title"`
- ShortName string `db:"ShortName"`
- CreatedAt string `db:"CreatedAt"`
- DeletedAt string `db:"DeletedAt"`
-
+type {{.Name}}DO struct {
+    {{ range .Fields }} {{.Name}} {{.Type}} {{.DbMap}}
+{{ end }}
 }

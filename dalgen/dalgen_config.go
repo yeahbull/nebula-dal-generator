@@ -22,6 +22,7 @@ import (
 	"os"
 	"fmt"
 	"io/ioutil"
+	"github.com/golang/glog"
 )
 
 type Coloum struct {
@@ -37,7 +38,8 @@ type Operation struct {
 }
 
 type DalgenConfig struct {
-	// XMLName xml.Name 	`xml:"table"`
+	FilePath			string
+
 	// 表名
 	TableName string	`xml:"sqlname,attr"`
 	// 列
@@ -46,8 +48,8 @@ type DalgenConfig struct {
 	Ops  []Operation	`xml:"operation"`
 }
 
-func NewDalgenConfig(configFile string) (dalgen *DalgenConfig, err error) {
-	file, err := os.Open(configFile) // For read access.
+func NewDalgenConfig(configFile, xmlFileName string) (dalgen *DalgenConfig, err error) {
+	file, err := os.Open(fmt.Sprintf("%s/tables/%s.xml", configFile, xmlFileName)) // For read access.
 	if err != nil {
 		fmt.Printf("error: %v", err)
 		return
@@ -55,17 +57,18 @@ func NewDalgenConfig(configFile string) (dalgen *DalgenConfig, err error) {
 	defer file.Close()
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		fmt.Printf("error: %v", err)
+		glog.Errorf("error: %v", err)
 		return
 	}
 	v := &DalgenConfig{}
 	err = xml.Unmarshal(data, v)
 	if err != nil {
-		fmt.Printf("error: %v", err)
+		glog.Errorf("error: %v", err)
 		return
 	}
 
 	dalgen = v
+	dalgen.FilePath = configFile
 	return
 }
 

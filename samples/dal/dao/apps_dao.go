@@ -17,40 +17,36 @@
 
 package dao
 
-import(
-	do "github.com/nebulaim/nebula-dal-generator/samples/dal/dataobject"
-	"github.com/jmoiron/sqlx"
+import (
 	"github.com/golang/glog"
+	"github.com/jmoiron/sqlx"
+	do "github.com/nebulaim/nebula-dal-generator/samples/dal/dataobject"
 )
 
 type AppsDAO struct {
 	db *sqlx.DB
 }
 
-func NewAppsDAO(db* sqlx.DB) *AppsDAO {
+func NewAppsDAO(db *sqlx.DB) *AppsDAO {
 	return &AppsDAO{db}
 }
 
-func (dao *AppsDAO) Insert(do *do.AppsDO) (id int32, err error) {
+func (dao *AppsDAO) Insert(do *do.AppsDO) (id int64, err error) {
 	// TODO(@benqi): sqlmap
-	var sql = "INSERT INTO apps (api_id, api_hash, title, short_name) VALUES (:api_id, :api_hash, :title, :short_name)"
+	var sql = "insert into apps(api_id, api_hash, title, short_name) values (:api_id, :api_hash, :title, :short_name)"
 	r, err := dao.db.NamedExec(sql, do)
 	if err != nil {
 		glog.Error("AppsDAO/Insert error: ", err)
-		return
+		return 0, nil
 	}
 
-	id2, _ := r.LastInsertId()
-	id = int32(id2)
-	do.Id = id
-	return
+	return r.LastInsertId()
 }
 
 func (dao *AppsDAO) SelectById(id int32) (*do.AppsDO, error) {
 	// TODO(@benqi): sqlmap
-	// select id,api_id,api_hash,title,short_name,short_name from apps where id = ?
-	var sql = "SELECT api_id, api_hash, title, short_name FROM apps WHERE id=:id"
-	do := &do.AppsDO{ Id: id }
+	var sql = "select id, api_id, api_hash, title, short_name from apps where id = :id"
+	do := &do.AppsDO{Id: id}
 	r, err := dao.db.NamedQuery(sql, do)
 	if err != nil {
 		glog.Error("AppsDAO/SelectById error: ", err)
@@ -63,7 +59,6 @@ func (dao *AppsDAO) SelectById(id int32) (*do.AppsDO, error) {
 			glog.Error("AppsDAO/SelectById error: ", err)
 			return nil, err
 		}
-		do.Id = id
 	} else {
 		return nil, nil
 	}

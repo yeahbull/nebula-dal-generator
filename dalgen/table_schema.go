@@ -22,6 +22,7 @@ import (
 	"strings"
 	"log"
 	"database/sql"
+	"fmt"
 )
 
 /*
@@ -96,12 +97,12 @@ func GetTableSchema(db *sqlx.DB, tableName string) string {
 	return s[:idx]
 }
 
-func NewTableSchema(db *sqlx.DB, tableName string) (*TableSchema, error) {
-	comment := GetTableSchema(db, tableName)
+func NewTableSchema(db *sqlx.DB, dalgen *DalgenConfig) (*TableSchema, error) {
+	comment := GetTableSchema(db, dalgen.TableName)
 
 	fields := []FieldSchema{}
 
-	err := db.Select(&fields, "show full fields from apps")
+	err := db.Select(&fields, fmt.Sprintf("show full fields from %s", dalgen.TableName))
 	if err != nil {
 		log.Println("4: ", err)
 		return nil, err
@@ -113,7 +114,7 @@ func NewTableSchema(db *sqlx.DB, tableName string) (*TableSchema, error) {
 	}
 
 	t := &TableSchema{}
-	t.Name = tableName
+	t.Name = dalgen.TableName
 	t.Comment = comment
 	t.Fields = fields
 
