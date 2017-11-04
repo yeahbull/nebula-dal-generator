@@ -18,7 +18,7 @@
 package dao
 
 import(
-	do "github.com/nebulaim/nebula-dal-generator/samples/dal/dataobject"
+	do "github.com/nebulaim/telegramd/biz_model/dal/dataobject"
 	"github.com/jmoiron/sqlx"
 	"github.com/golang/glog"
 )
@@ -36,20 +36,30 @@ func New{{.Name}}DAO(db* sqlx.DB) *{{.Name}}DAO {
 {{template "INSERT" $v}}
 {{else if eq .QueryType "SELECT"}}
 {{template "SELECT" $v}}
+{{else if eq .QueryType "UPDATE"}}
+{{template "UPDATE" $v}}
+{{else if eq .QueryType "DELETE"}}
+{{template "DELETE" $v}}
 {{end}}
 {{end}}
 
 {{define "INSERT"}}
 func (dao *{{.TableName}}DAO) {{.FuncName}}(do *do.{{.TableName}}DO) (id int64, err error) {
 	// TODO(@benqi): sqlmap
+	id = 0
+
 	var sql = "{{.Sql}}"
 	r, err := dao.db.NamedExec(sql, do)
 	if err != nil {
 		glog.Error("{{.TableName}}DAO/{{.FuncName}} error: ", err)
-		return 0, nil
+		return
 	}
 
-	return r.LastInsertId()
+	id, err = r.LastInsertId()
+	if err != nil {
+		glog.Error("{{.TableName}}DAO/LastInsertId error: ", err)
+	}
+	return
 }
 {{end}}
 
@@ -60,14 +70,14 @@ func (dao *{{.TableName}}DAO) {{.FuncName}}({{ range $i, $v := .Params }} {{if n
 	do := &do.{{.TableName}}DO{ {{ range $i, $v := .Params }} {{.Name}} : {{.FieldName}}, {{end}} }
 	r, err := dao.db.NamedQuery(sql, do)
 	if err != nil {
-		glog.Error("AppsDAO/SelectById error: ", err)
+		glog.Error("{{.TableName}}DAO/SelectById error: ", err)
 		return nil, err
 	}
 
 	if r.Next() {
 		err = r.StructScan(do)
 		if err != nil {
-			glog.Error("AppsDAO/SelectById error: ", err)
+			glog.Error("{{.TableName}}DAO/SelectById error: ", err)
 			return nil, err
 		}
 	} else {
@@ -79,7 +89,43 @@ func (dao *{{.TableName}}DAO) {{.FuncName}}({{ range $i, $v := .Params }} {{if n
 {{end}}
 
 {{define "UPDATE"}}
+func (dao *{{.TableName}}DAO) {{.FuncName}}({{ range $i, $v := .Params }} {{if ne $i 0 }} , {{end}} {{.FieldName}} {{.Type}} {{end}}) (rows int64, err error) {
+	// TODO(@benqi): sqlmap
+	rows = 0
+
+	var sql = "{{.Sql}}"
+	do := &do.{{.TableName}}DO{ {{ range $i, $v := .Params }} {{.Name}} : {{.FieldName}}, {{end}} }
+	r, err := dao.db.NamedExec(sql, do)
+	if err != nil {
+		glog.Error("{{.TableName}}DAO/{{.FuncName}} error: ", err)
+		return
+	}
+
+	rows, err = r.RowsAffected()
+	if err != nil {
+		glog.Error("{{.TableName}}DAO/RowsAffected error: ", err)
+	}
+	return
+}
 {{end}}
 
 {{define "DELETE"}}
+func (dao *{{.TableName}}DAO) {{.FuncName}}({{ range $i, $v := .Params }} {{if ne $i 0 }} , {{end}} {{.FieldName}} {{.Type}} {{end}}) (rows int64, err error) {
+	// TODO(@benqi): sqlmap
+	rows = 0
+
+	var sql = "{{.Sql}}"
+	do := &do.{{.TableName}}DO{ {{ range $i, $v := .Params }} {{.Name}} : {{.FieldName}}, {{end}} }
+	r, err := dao.db.NamedExec(sql, do)
+	if err != nil {
+		glog.Error("{{.TableName}}DAO/{{.FuncName}} error: ", err)
+		return
+	}
+
+	rows, err = r.RowsAffected()
+	if err != nil {
+		glog.Error("{{.TableName}}DAO/RowsAffected error: ", err)
+	}
+	return
+}
 {{end}}

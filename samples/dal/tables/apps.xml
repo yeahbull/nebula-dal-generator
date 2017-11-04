@@ -16,4 +16,17 @@
             id=:id
         </sql>
     </operation>
+
+    <operation name="Update">
+        <sql>
+            update apps set title = :title where id=:id
+        </sql>
+    </operation>
+
+    <operation name="Delete">
+        <sql>
+            delete from apps where id=:id
+        </sql>
+    </operation>
+
 </table>

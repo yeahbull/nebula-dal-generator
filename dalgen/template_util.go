@@ -84,7 +84,8 @@ func GenDataObject(dalgen* DalgenConfig, schema *TableSchema) {
 //	DbMap string
 //}
 
-type Param struct{
+type Param struct {
+	// TODO(@benqi): 驼峰参数名, 参数名从user_id ==> userId
 	Name string
 	Type string
 	FieldName string
@@ -108,6 +109,8 @@ type TemplateDAO struct {
 func GenDAO(dalgen* DalgenConfig, schema *TableSchema) {
 	dao := TemplateDAO{}
 	dao.Name = ToCamel(schema.Name)
+
+	// TODO(@benqi): 表名字段名等合法性检查
 
 	for _, v := range dalgen.Ops {
 		stmt, err := sqlparser.Parse(v.Sql)

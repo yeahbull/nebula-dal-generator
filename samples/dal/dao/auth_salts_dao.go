@@ -17,22 +17,19 @@
 
 package dao
 
-import(
-	do "github.com/nebulaim/nebula-dal-generator/samples/dal/dataobject"
-	"github.com/jmoiron/sqlx"
+import (
 	"github.com/golang/glog"
+	"github.com/jmoiron/sqlx"
+	do "github.com/nebulaim/nebula-dal-generator/samples/dal/dataobject"
 )
 
 type AuthSaltsDAO struct {
 	db *sqlx.DB
 }
 
-func NewAuthSaltsDAO(db* sqlx.DB) *AuthSaltsDAO {
+func NewAuthSaltsDAO(db *sqlx.DB) *AuthSaltsDAO {
 	return &AuthSaltsDAO{db}
 }
-
-
-
 
 func (dao *AuthSaltsDAO) Insert(do *do.AuthSaltsDO) (id int64, err error) {
 	// TODO(@benqi): sqlmap
@@ -46,14 +43,10 @@ func (dao *AuthSaltsDAO) Insert(do *do.AuthSaltsDO) (id int64, err error) {
 	return r.LastInsertId()
 }
 
-
-
-
-
-func (dao *AuthSaltsDAO) SelectByAuthId(  auth_id int64 ) (*do.AuthSaltsDO, error) {
+func (dao *AuthSaltsDAO) SelectByAuthId(auth_id int64) (*do.AuthSaltsDO, error) {
 	// TODO(@benqi): sqlmap
 	var sql = "select auth_id, salt from auth_salts where auth_id = :auth_id"
-	do := &do.AuthSaltsDO{  AuthId : auth_id,  }
+	do := &do.AuthSaltsDO{AuthId: auth_id}
 	r, err := dao.db.NamedQuery(sql, do)
 	if err != nil {
 		glog.Error("AppsDAO/SelectById error: ", err)
@@ -72,14 +65,3 @@ func (dao *AuthSaltsDAO) SelectByAuthId(  auth_id int64 ) (*do.AuthSaltsDO, erro
 
 	return do, nil
 }
-
-
-
-
-
-
-
-
-
-
-

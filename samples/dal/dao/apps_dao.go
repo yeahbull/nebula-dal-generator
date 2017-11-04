@@ -20,7 +20,7 @@ package dao
 import (
 	"github.com/golang/glog"
 	"github.com/jmoiron/sqlx"
-	do "github.com/nebulaim/nebula-dal-generator/samples/dal/dataobject"
+	do "github.com/nebulaim/telegramd/biz_model/dal/dataobject"
 )
 
 type AppsDAO struct {
@@ -33,14 +33,20 @@ func NewAppsDAO(db *sqlx.DB) *AppsDAO {
 
 func (dao *AppsDAO) Insert(do *do.AppsDO) (id int64, err error) {
 	// TODO(@benqi): sqlmap
+	id = 0
+
 	var sql = "insert into apps(api_id, api_hash, title, short_name) values (:api_id, :api_hash, :title, :short_name)"
 	r, err := dao.db.NamedExec(sql, do)
 	if err != nil {
 		glog.Error("AppsDAO/Insert error: ", err)
-		return 0, nil
+		return
 	}
 
-	return r.LastInsertId()
+	id, err = r.LastInsertId()
+	if err != nil {
+		glog.Error("AppsDAO/LastInsertId error: ", err)
+	}
+	return
 }
 
 func (dao *AppsDAO) SelectById(id int32) (*do.AppsDO, error) {
@@ -64,4 +70,42 @@ func (dao *AppsDAO) SelectById(id int32) (*do.AppsDO, error) {
 	}
 
 	return do, nil
+}
+
+func (dao *AppsDAO) Update(title string, id int32) (rows int64, err error) {
+	// TODO(@benqi): sqlmap
+	rows = 0
+
+	var sql = "update apps set title = :title where id = :id"
+	do := &do.AppsDO{Title: title, Id: id}
+	r, err := dao.db.NamedExec(sql, do)
+	if err != nil {
+		glog.Error("AppsDAO/Update error: ", err)
+		return
+	}
+
+	rows, err = r.RowsAffected()
+	if err != nil {
+		glog.Error("AppsDAO/RowsAffected error: ", err)
+	}
+	return
+}
+
+func (dao *AppsDAO) Delete(id int32) (rows int64, err error) {
+	// TODO(@benqi): sqlmap
+	rows = 0
+
+	var sql = "delete from apps where id = :id"
+	do := &do.AppsDO{Id: id}
+	r, err := dao.db.NamedExec(sql, do)
+	if err != nil {
+		glog.Error("AppsDAO/Delete error: ", err)
+		return
+	}
+
+	rows, err = r.RowsAffected()
+	if err != nil {
+		glog.Error("AppsDAO/RowsAffected error: ", err)
+	}
+	return
 }
