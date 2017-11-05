@@ -17,6 +17,13 @@
         </sql>
     </operation>
 
+    <operation name="SelectListById" result_set="list">
+        <sql>
+            select id, api_id, api_hash, title, short_name from
+            apps limit 10
+        </sql>
+    </operation>
+
     <operation name="Update">
         <sql>
             update apps set title = :title where id=:id

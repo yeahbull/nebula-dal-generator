@@ -18,36 +18,36 @@
 package dalgen
 
 import (
-	"text/template"
-	"fmt"
-	"github.com/xwb1989/sqlparser"
 	"bytes"
-	"io/ioutil"
+	"fmt"
 	"github.com/golang/glog"
+	"github.com/xwb1989/sqlparser"
+	"io/ioutil"
+	"text/template"
 )
 
 //Id        int32		`db:"id"`
 type TemplateField struct {
-	Name string
-	Type string
+	Name  string
+	Type  string
 	DbMap string
 }
 
 type TemplateDO struct {
-	Name string
+	Name   string
 	Fields []TemplateField
 }
 
-func GenDataObject(dalgen* DalgenConfig, schema *TableSchema) {
+func GenDataObject(dalgen *DalgenConfig, schema *TableSchema) {
 	do := TemplateDO{}
 
 	do.Name = ToCamel(schema.Name)
-	for _, v := range schema.Fields  {
+	for _, v := range schema.Fields {
 		f := TemplateField{}
 		f.Name = ToCamel(v.Field)
 		f.Type = v.Type
 		f.DbMap = fmt.Sprintf("`db:\"%s\"`", v.Field)
-		do.Fields  = append(do.Fields, f)
+		do.Fields = append(do.Fields, f)
 	}
 
 	// glog.Info(do)
@@ -86,27 +86,26 @@ func GenDataObject(dalgen* DalgenConfig, schema *TableSchema) {
 
 type Param struct {
 	// TODO(@benqi): 驼峰参数名, 参数名从user_id ==> userId
-	Name string
-	Type string
+	Name      string
+	Type      string
 	FieldName string
 }
 
 type Func struct {
-	TableName 	string
-	QueryType 	string
+	TableName string
+	QueryType string
 
-	FuncName	string
-	Params 	 	[]Param
-	Sql 		string
+	FuncName string
+	Params   []Param
+	Sql      string
 }
 
 type TemplateDAO struct {
-	Name string
+	Name  string
 	Funcs []Func
 }
 
-
-func GenDAO(dalgen* DalgenConfig, schema *TableSchema) {
+func GenDAO(dalgen *DalgenConfig, schema *TableSchema) {
 	dao := TemplateDAO{}
 	dao.Name = ToCamel(schema.Name)
 
@@ -127,7 +126,11 @@ func GenDAO(dalgen* DalgenConfig, schema *TableSchema) {
 		f.Sql = sqlparser.String(stmt)
 		switch stmt.(type) {
 		case *sqlparser.Select:
-			f.QueryType = "SELECT"
+			if v.ResultSet == "list" {
+				f.QueryType = "SELECT_STRUCT_LIST"
+			} else {
+				f.QueryType = "SELECT_STRUCT_SINGLE"
+			}
 		case *sqlparser.Insert:
 			f.QueryType = "INSERT"
 		case *sqlparser.Update:
@@ -143,17 +146,15 @@ func GenDAO(dalgen* DalgenConfig, schema *TableSchema) {
 		for k, _ := range got {
 			fld := schema.GetFieldSchema(k)
 			// fmt.Println(fld)
-			p := Param {
-				Name: ToCamel(fld.Field),
-				Type: fld.Type,
-				FieldName: fld.Field }
+			p := Param{
+				Name:      ToCamel(fld.Field),
+				Type:      fld.Type,
+				FieldName: fld.Field}
 			f.Params = append(f.Params, p)
 		}
 		// fmt.Println(f)
 		dao.Funcs = append(dao.Funcs, f)
 	}
-
-
 
 	// f3, _ := file.Create(fmt.Sprintf("./%s_dao.go", dao.Name))
 

@@ -53,14 +53,15 @@ func (dao *AppsDAO) SelectById(id int32) (*do.AppsDO, error) {
 	// TODO(@benqi): sqlmap
 	var sql = "select id, api_id, api_hash, title, short_name from apps where id = :id"
 	do := &do.AppsDO{Id: id}
-	r, err := dao.db.NamedQuery(sql, do)
+	rows, err := dao.db.NamedQuery(sql, do)
 	if err != nil {
 		glog.Error("AppsDAO/SelectById error: ", err)
 		return nil, err
 	}
 
-	if r.Next() {
-		err = r.StructScan(do)
+	defer rows.Close()
+	if rows.Next() {
+		err = rows.StructScan(do)
 		if err != nil {
 			glog.Error("AppsDAO/SelectById error: ", err)
 			return nil, err
@@ -70,6 +71,34 @@ func (dao *AppsDAO) SelectById(id int32) (*do.AppsDO, error) {
 	}
 
 	return do, nil
+}
+
+func (dao *AppsDAO) SelectListById() ([]do.AppsDO, error) {
+	// TODO(@benqi): sqlmap
+	var sql = "select id, api_id, api_hash, title, short_name from apps limit 10"
+	do := &do.AppsDO{}
+	rows, err := dao.db.NamedQuery(sql, do)
+	if err != nil {
+		glog.Errorf("AppsDAO/SelectListById error: ", err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var values []do.AppsDO
+	for rows.Next() {
+		v := do.AppsDO{}
+
+		// TODO(@benqi): 不使用反射
+		err := rows.StructScan(&v)
+		if err != nil {
+			glog.Errorf("AppsDAO/SelectListById error: %s", err)
+			return nil, err
+		}
+		values = append(values, v)
+	}
+
+	return values, nil
 }
 
 func (dao *AppsDAO) Update(title string, id int32) (rows int64, err error) {

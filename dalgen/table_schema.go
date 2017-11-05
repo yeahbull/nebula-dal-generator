@@ -18,11 +18,11 @@
 package dalgen
 
 import (
-	"github.com/jmoiron/sqlx"
-	"strings"
-	"log"
 	"database/sql"
 	"fmt"
+	"github.com/jmoiron/sqlx"
+	"log"
+	"strings"
 )
 
 /*
@@ -49,30 +49,30 @@ import (
 	  UNIQUE KEY `api_id` (`api_id`)
 	) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='apps' |
 	+-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
- */
+*/
 
 type FieldSchema struct {
-	Field string				`db:"Field"`
-	Type string					`db:"Type"`
-	Collation sql.NullString	`db:"Collation"`
-	Null string					`db:"Null"`
-	Key string					`db:"Key"`
-	Default sql.NullString		`db:"Default"`
-	Extra string				`db:"Extra"`
-	Privileges string			`db:"Privileges"`
-	Comment string				`db:"Comment"`
+	Field      string         `db:"Field"`
+	Type       string         `db:"Type"`
+	Collation  sql.NullString `db:"Collation"`
+	Null       string         `db:"Null"`
+	Key        string         `db:"Key"`
+	Default    sql.NullString `db:"Default"`
+	Extra      string         `db:"Extra"`
+	Privileges string         `db:"Privileges"`
+	Comment    string         `db:"Comment"`
 }
 
 type TableSchema struct {
-	Name string 				`db:"Table"`	//  表名
-	Comment string				`db:"Create Table"`	//  字段信息
-	Fields []FieldSchema
+	Name    string `db:"Table"`        //  表名
+	Comment string `db:"Create Table"` //  字段信息
+	Fields  []FieldSchema
 }
 
 func GetTableSchema(db *sqlx.DB, tableName string) string {
 	type Table struct {
-		Name string 			`db:"Table"`	//  表名
-		CreateDDL string		`db:"Create Table"`	//  字段信息
+		Name      string `db:"Table"`        //  表名
+		CreateDDL string `db:"Create Table"` //  字段信息
 	}
 
 	t := &Table{}
@@ -89,7 +89,7 @@ func GetTableSchema(db *sqlx.DB, tableName string) string {
 		return ""
 	}
 
-	s := t.CreateDDL[idx + len("COMMENT='"):]
+	s := t.CreateDDL[idx+len("COMMENT='"):]
 	idx = strings.Index(s, "'")
 	// log.Println("3: ", idx, ", ", s)
 
@@ -123,7 +123,7 @@ func NewTableSchema(db *sqlx.DB, dalgen *DalgenConfig) (*TableSchema, error) {
 	return t, err
 }
 
-func (t *TableSchema) GetFieldSchema(fldName string) ( fld *FieldSchema) {
+func (t *TableSchema) GetFieldSchema(fldName string) (fld *FieldSchema) {
 	for i, v := range t.Fields {
 		// fmt.Println(v, "  ", fldName)
 		if v.Field == fldName {
@@ -158,4 +158,3 @@ func ToGoType(name string) (t string) {
 
 	return t
 }
-

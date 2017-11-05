@@ -19,33 +19,49 @@ package dalgen
 
 import (
 	"encoding/xml"
-	"os"
 	"fmt"
-	"io/ioutil"
 	"github.com/golang/glog"
+	"io/ioutil"
+	"os"
+)
+
+const (
+	RESULT_TYPE_DEFAULT = ""
+	RESULT_TYPE_STRUCT  = "struct"
+	RESULT_TYPE_MAP     = "map"
+	RESULT_TYPE_INT     = "int"
+	RESULT_TYPE_STRING  = "string"
+)
+
+const (
+	RESULT_SET_DEFAULT = ""
+	RESULT_SET_ONE     = "single"
+	RESULT_SET_LIST    = "list"
 )
 
 type Coloum struct {
-	ColName 		string	`xml:"name,attr"`
-	ColType 		string	`xml:"type,attr"`
-	ColVarName 		string	`xml:"varname,attr"`
-	DefaultValue 	string	`xml:"defaultValue,attr"`
+	ColName      string `xml:"name,attr"`
+	ColType      string `xml:"type,attr"`
+	ColVarName   string `xml:"varname,attr"`
+	DefaultValue string `xml:"defaultValue,attr"`
 }
 
 type Operation struct {
-	Name string		`xml:"name,attr"`
-	Sql  string		`xml:"sql"`
+	Name       string `xml:"name,attr"`
+	ResultType string `xml:"result_type,attr"`
+	ResultSet  string `xml:"result_set,attr"`
+	Sql        string `xml:"sql"`
 }
 
 type DalgenConfig struct {
-	FilePath			string
+	FilePath string
 
 	// 表名
-	TableName string	`xml:"sqlname,attr"`
+	TableName string `xml:"sqlname,attr"`
 	// 列
-	Cols []Coloum		`xml:"column"`
+	Cols []Coloum `xml:"column"`
 	// 操作
-	Ops  []Operation	`xml:"operation"`
+	Ops []Operation `xml:"operation"`
 }
 
 func NewDalgenConfig(configFile, xmlFileName string) (dalgen *DalgenConfig, err error) {
@@ -71,12 +87,3 @@ func NewDalgenConfig(configFile, xmlFileName string) (dalgen *DalgenConfig, err 
 	dalgen.FilePath = configFile
 	return
 }
-
-//func (d* DalgenConfig) ToDataObject() string {
-//	return ""
-//}
-//
-//func (d* DalgenConfig) ToDAO() string {
-//	return ""
-//}
-//
