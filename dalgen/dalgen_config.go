@@ -39,6 +39,14 @@ const (
 	RESULT_SET_LIST    = "list"
 )
 
+const (
+	PARAM_TYPE_INT32LIST = "[]int32"
+	PARAM_TYPE_UINT32LIST = "[]uint32"
+	PARAM_TYPE_INT64LIST = "[]int64"
+	PARAM_TYPE_UINT64LIST = "[]uint64"
+	PARAM_TYPE_STRINGLIST = "[]string"
+)
+
 type Coloum struct {
 	ColName      string `xml:"name,attr"`
 	ColType      string `xml:"type,attr"`
@@ -46,11 +54,20 @@ type Coloum struct {
 	DefaultValue string `xml:"defaultValue,attr"`
 }
 
+type OpParams struct {
+	OpParams []OpParam  `xml:"param"`
+}
+type OpParam struct {
+	ParamName string	`xml:"name,attr"`
+	ParamType string	`xml:"type,attr"`
+}
+
 type Operation struct {
 	Name       string `xml:"name,attr"`
 	ResultType string `xml:"result_type,attr"`
 	ResultSet  string `xml:"result_set,attr"`
 	Sql        string `xml:"sql"`
+	Parsms     OpParams `xml:"params"`
 }
 
 type DalgenConfig struct {
@@ -85,5 +102,6 @@ func NewDalgenConfig(configFile, xmlFileName string) (dalgen *DalgenConfig, err 
 
 	dalgen = v
 	dalgen.FilePath = configFile
+
 	return
 }

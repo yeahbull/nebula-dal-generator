@@ -96,6 +96,7 @@ func main() {
 		return
 	}
 
+	// glog.Infof("%v", dalgenConfig)
 	s, _ := dalgen2.NewTableSchema(db, dalgenConfig)
 	dalgen2.GenDataObject(dalgenConfig, s)
 	dalgen2.GenDAO(dalgenConfig, s)

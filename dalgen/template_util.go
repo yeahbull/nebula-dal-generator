@@ -144,13 +144,55 @@ func GenDAO(dalgen *DalgenConfig, schema *TableSchema) {
 		got := sqlparser.GetBindvars(stmt)
 		// fmt.Println("got: ", got)
 		for k, _ := range got {
-			fld := schema.GetFieldSchema(k)
-			// fmt.Println(fld)
-			p := Param{
-				Name:      ToCamel(fld.Field),
-				Type:      fld.Type,
-				FieldName: fld.Field}
-			f.Params = append(f.Params, p)
+			// var isParam bool
+			isParam := false
+			// = false
+			for _, p2 := range v.Parsms.OpParams {
+				if p2.ParamName == k {
+					p := Param{
+						Name:      ToCamel(p2.ParamName),
+						Type:      p2.ParamType,
+						FieldName: p2.ParamName,
+					}
+					f.Params = append(f.Params, p)
+					isParam = true
+					break
+				}
+			}
+
+			if !isParam {
+				fld := schema.GetFieldSchema(k)
+				if fld != nil {
+					// fmt.Println(fld)
+					p := Param{
+						Name:      ToCamel(fld.Field),
+						Type:      fld.Type,
+						FieldName: fld.Field}
+					f.Params = append(f.Params, p)
+				} else {
+					glog.Errorf("Not find fld: %s", k)
+				}
+			}
+
+			//fld := schema.GetFieldSchema(k)
+			//if fld == nil {
+			//	for _, p2 := range v.Parsms.OpParams {
+			//		p := Param{
+			//			Name:      p2.ParamName,
+			//			Type:      p2.ParamType,
+			//			FieldName: p2.ParamName,
+			//		}
+			//		f.Params = append(f.Params, p)
+			//	}
+			//
+			//} else {
+			//	// fmt.Println(fld)
+			//	p := Param{
+			//		Name:      ToCamel(fld.Field),
+			//		Type:      fld.Type,
+			//		FieldName: fld.Field}
+			//	f.Params = append(f.Params, p)
+			//}
 		}
 		// fmt.Println(f)
 		dao.Funcs = append(dao.Funcs, f)

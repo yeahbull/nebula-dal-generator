@@ -24,6 +24,15 @@
         </sql>
     </operation>
 
+    <operation name="SelectAppsByIdList" result_set="list">
+        <params>
+            <param name="idList" type="[]int32" />
+        </params>
+        <sql>
+            select id, api_id, api_hash, title, short_name from apps where id in (:idList)
+        </sql>
+    </operation>
+
     <operation name="Update">
         <sql>
             update apps set title = :title where id=:id

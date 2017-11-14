@@ -23,6 +23,7 @@ import (
 	"github.com/golang/glog"
 	dao2 "github.com/nebulaim/nebula-dal-generator/samples/dal/dao"
 	"flag"
+	// base2 "github.com/nebulaim/telegramd/base/base"
 )
 
 func init() {
@@ -41,6 +42,10 @@ func main() {
 	}
 
 	dao := dao2.NewAppsDAO(db)
-	do, _ := dao.SelectById(1)
-	glog.Info(do)
+	// do, _ := dao.SelectById(1)
+	p2 := []int32{1,2,3}
+	// p := make(map[string]string)
+	// p["idList"] = base.JoinInt32List(p2, ",")
+	dos, _ := dao.SelectAppsByIdList(p2)
+	glog.Info(dos)
 }

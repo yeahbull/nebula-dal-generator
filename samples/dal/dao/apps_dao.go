@@ -20,6 +20,7 @@ package dao
 import (
 	"github.com/golang/glog"
 	"github.com/jmoiron/sqlx"
+	"github.com/nebulaim/telegramd/base/base"
 	do "github.com/nebulaim/telegramd/biz_model/dal/dataobject"
 )
 
@@ -52,13 +53,17 @@ func (dao *AppsDAO) Insert(do *do.AppsDO) (id int64, err error) {
 func (dao *AppsDAO) SelectById(id int32) (*do.AppsDO, error) {
 	// TODO(@benqi): sqlmap
 	var sql = "select id, api_id, api_hash, title, short_name from apps where id = :id"
-	do := &do.AppsDO{Id: id}
-	rows, err := dao.db.NamedQuery(sql, do)
+	params := make(map[string]interface{})
+
+	params["id"] = id
+
+	rows, err := dao.db.NamedQuery(sql, params)
 	if err != nil {
 		glog.Error("AppsDAO/SelectById error: ", err)
 		return nil, err
 	}
 
+	do := &do.AppsDO{}
 	defer rows.Close()
 	if rows.Next() {
 		err = rows.StructScan(do)
@@ -76,8 +81,10 @@ func (dao *AppsDAO) SelectById(id int32) (*do.AppsDO, error) {
 func (dao *AppsDAO) SelectListById() ([]do.AppsDO, error) {
 	// TODO(@benqi): sqlmap
 	var sql = "select id, api_id, api_hash, title, short_name from apps limit 10"
-	do := &do.AppsDO{}
-	rows, err := dao.db.NamedQuery(sql, do)
+
+	params := make(map[string]interface{})
+
+	rows, err := dao.db.NamedQuery(sql, params)
 	if err != nil {
 		glog.Errorf("AppsDAO/SelectListById error: ", err)
 		return nil, err
@@ -101,13 +108,50 @@ func (dao *AppsDAO) SelectListById() ([]do.AppsDO, error) {
 	return values, nil
 }
 
-func (dao *AppsDAO) Update(title string, id int32) (rows int64, err error) {
+func (dao *AppsDAO) SelectAppsByIdList(idList []int32) ([]do.AppsDO, error) {
+	// TODO(@benqi): sqlmap
+	var sql = "select id, api_id, api_hash, title, short_name from apps where id in (:idList)"
+
+	params := make(map[string]interface{})
+
+	params["idList"] = base.JoinInt32List(idList, ",")
+
+	rows, err := dao.db.NamedQuery(sql, params)
+	if err != nil {
+		glog.Errorf("AppsDAO/SelectAppsByIdList error: ", err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var values []do.AppsDO
+	for rows.Next() {
+		v := do.AppsDO{}
+
+		// TODO(@benqi): 不使用反射
+		err := rows.StructScan(&v)
+		if err != nil {
+			glog.Errorf("AppsDAO/SelectAppsByIdList error: %s", err)
+			return nil, err
+		}
+		values = append(values, v)
+	}
+
+	return values, nil
+}
+
+func (dao *AppsDAO) Update(id int32, title string) (rows int64, err error) {
 	// TODO(@benqi): sqlmap
 	rows = 0
 
 	var sql = "update apps set title = :title where id = :id"
-	do := &do.AppsDO{Title: title, Id: id}
-	r, err := dao.db.NamedExec(sql, do)
+
+	params := make(map[string]interface{})
+
+	params["id"] = id
+	params["title"] = title
+
+	r, err := dao.db.NamedExec(sql, params)
 	if err != nil {
 		glog.Error("AppsDAO/Update error: ", err)
 		return
@@ -125,8 +169,11 @@ func (dao *AppsDAO) Delete(id int32) (rows int64, err error) {
 	rows = 0
 
 	var sql = "delete from apps where id = :id"
-	do := &do.AppsDO{Id: id}
-	r, err := dao.db.NamedExec(sql, do)
+	params := make(map[string]interface{})
+
+	params["id"] = id
+
+	r, err := dao.db.NamedExec(sql, params)
 	if err != nil {
 		glog.Error("AppsDAO/Delete error: ", err)
 		return

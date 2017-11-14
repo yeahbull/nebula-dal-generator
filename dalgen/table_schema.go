@@ -128,9 +128,9 @@ func (t *TableSchema) GetFieldSchema(fldName string) (fld *FieldSchema) {
 		// fmt.Println(v, "  ", fldName)
 		if v.Field == fldName {
 			fld = &t.Fields[i]
+			return
 		}
 	}
-
 	return
 }
 
