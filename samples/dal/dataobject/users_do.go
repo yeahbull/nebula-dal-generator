@@ -17,12 +17,18 @@
 
 package dataobject
 
-type AppsDO struct {
-	Id        int32  `db:"id"`
-	ApiId     int32  `db:"api_id"`
-	ApiHash   string `db:"api_hash"`
-	Title     string `db:"title"`
-	ShortName string `db:"short_name"`
-	CreatedAt string `db:"created_at"`
-	DeletedAt string `db:"deleted_at"`
+type UsersDO struct {
+	Id          int32  `db:"id"`
+	AccessHash  int64  `db:"access_hash"`
+	FirstName   string `db:"first_name"`
+	LastName    string `db:"last_name"`
+	Username    string `db:"username"`
+	Phone       string `db:"phone"`
+	CountryCode string `db:"country_code"`
+	Bio         string `db:"bio"`
+	State       int32  `db:"state"`
+	IsBot       int8   `db:"is_bot"`
+	CreatedAt   string `db:"created_at"`
+	UpdatedAt   string `db:"updated_at"`
+	DeletedAt   string `db:"deleted_at"`
 }

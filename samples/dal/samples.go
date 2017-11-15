@@ -41,11 +41,11 @@ func main() {
 		return
 	}
 
-	dao := dao2.NewAppsDAO(db)
+	dao := dao2.NewUsersDAO(db)
 	// do, _ := dao.SelectById(1)
-	p2 := []int32{1,2,3}
+	p2 := []int32{2,3,4}
 	// p := make(map[string]string)
 	// p["idList"] = base.JoinInt32List(p2, ",")
-	dos, _ := dao.SelectAppsByIdList(p2)
+	dos, _ := dao.SelectUsersByIdList(p2)
 	glog.Info(dos)
 }
