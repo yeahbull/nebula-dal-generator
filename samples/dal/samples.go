@@ -21,9 +21,9 @@ import (
 	_ "github.com/go-sql-driver/mysql" // import your used driver
 	"github.com/jmoiron/sqlx"
 	"github.com/golang/glog"
-	dao2 "github.com/nebulaim/nebula-dal-generator/samples/dal/dao"
 	"flag"
 	// base2 "github.com/nebulaim/telegramd/base/base"
+	"github.com/nebulaim/nebula-dal-generator/samples/dal/dao/mysql_dao"
 )
 
 func init() {
@@ -41,11 +41,15 @@ func main() {
 		return
 	}
 
-	dao := dao2.NewUsersDAO(db)
-	// do, _ := dao.SelectById(1)
-	p2 := []int32{2,3,4}
-	// p := make(map[string]string)
-	// p["idList"] = base.JoinInt32List(p2, ",")
-	dos, _ := dao.SelectUsersByIdList(p2)
-	glog.Info(dos)
+	dao := mysql_dao.NewMessagesDAO(db)
+	doList, _ := dao.SelectByUserIdAndPeerOffsetLimit(150, 2, 2, 4, 50)
+	//dao := dao2.NewUsersDAO(db)
+	//// do, _ := dao.SelectById(1)
+	//p2 := []int32{2,3,4}
+	//// p := make(map[string]string)
+	//// p["idList"] = base.JoinInt32List(p2, ",")
+	//dos, _ := dao.SelectUsersByIdList(p2)
+
+
+	glog.Info(doList)
 }

@@ -24,6 +24,7 @@ import (
 	"github.com/xwb1989/sqlparser"
 	"io/ioutil"
 	"text/template"
+	"github.com/jmoiron/sqlx"
 )
 
 //Id        int32		`db:"id"`
@@ -97,18 +98,22 @@ type Func struct {
 
 	FuncName string
 	Params   []Param
+	QueryParams   []Param
 	Sql      string
+	CompiledByNamedSql      string
+	ParamHasList string
 }
 
 type TemplateDAO struct {
 	Name  string
 	Funcs []Func
+	HasList string
 }
 
 func GenDAO(dalgen *DalgenConfig, schema *TableSchema) {
 	dao := TemplateDAO{}
 	dao.Name = ToCamel(schema.Name)
-
+	dao.HasList = "false"
 	// TODO(@benqi): 表名字段名等合法性检查
 
 	for _, v := range dalgen.Ops {
@@ -123,7 +128,14 @@ func GenDAO(dalgen *DalgenConfig, schema *TableSchema) {
 		f := Func{}
 		f.TableName = dao.Name
 		f.FuncName = v.Name
+
 		f.Sql = sqlparser.String(stmt)
+		f.CompiledByNamedSql, _, err = compileNamedQuery([]byte(f.Sql), sqlx.QUESTION)
+		if err != nil {
+			glog.Error("compileNamedQuery: ", v.Sql, ", error: ", err)
+			continue
+		}
+
 		switch stmt.(type) {
 		case *sqlparser.Select:
 			if v.ResultSet == "list" {
@@ -141,20 +153,38 @@ func GenDAO(dalgen *DalgenConfig, schema *TableSchema) {
 			continue
 		}
 
-		got := sqlparser.GetBindvars(stmt)
+		got := GetBindvarList(stmt)
 		// fmt.Println("got: ", got)
-		for k, _ := range got {
+		for _, k := range got {
 			// var isParam bool
 			isParam := false
 			// = false
 			for _, p2 := range v.Parsms.OpParams {
+				switch p2.ParamType {
+				case PARAM_TYPE_INT32LIST, PARAM_TYPE_INT64LIST, PARAM_TYPE_STRINGLIST, PARAM_TYPE_UINT32LIST, PARAM_TYPE_UINT64LIST:
+					dao.HasList = "true"
+					f.ParamHasList = "true"
+				}
+
 				if p2.ParamName == k {
 					p := Param{
 						Name:      ToCamel(p2.ParamName),
 						Type:      p2.ParamType,
 						FieldName: p2.ParamName,
 					}
-					f.Params = append(f.Params, p)
+
+					found := false
+					for _, v := range f.Params {
+						if v.Name == p.Name {
+							found = true
+						}
+					}
+					if !found {
+						f.Params = append(f.Params, p)
+					}
+
+					f.QueryParams = append(f.QueryParams, p)
+
 					isParam = true
 					break
 				}
@@ -167,34 +197,25 @@ func GenDAO(dalgen *DalgenConfig, schema *TableSchema) {
 					p := Param{
 						Name:      ToCamel(fld.Field),
 						Type:      fld.Type,
-						FieldName: fld.Field}
-					f.Params = append(f.Params, p)
+						FieldName: fld.Field,
+					}
+
+					found := false
+					for _, v := range f.Params {
+						if v.Name == p.Name {
+							found = true
+						}
+					}
+					if !found {
+						f.Params = append(f.Params, p)
+					}
+					f.QueryParams = append(f.QueryParams, p)
 				} else {
 					glog.Errorf("Not find fld: %s", k)
 				}
 			}
-
-			//fld := schema.GetFieldSchema(k)
-			//if fld == nil {
-			//	for _, p2 := range v.Parsms.OpParams {
-			//		p := Param{
-			//			Name:      p2.ParamName,
-			//			Type:      p2.ParamType,
-			//			FieldName: p2.ParamName,
-			//		}
-			//		f.Params = append(f.Params, p)
-			//	}
-			//
-			//} else {
-			//	// fmt.Println(fld)
-			//	p := Param{
-			//		Name:      ToCamel(fld.Field),
-			//		Type:      fld.Type,
-			//		FieldName: fld.Field}
-			//	f.Params = append(f.Params, p)
-			//}
 		}
-		// fmt.Println(f)
+		fmt.Printf("Process - func: [%s], query: [%s]\n", f.FuncName, f.Sql)
 		dao.Funcs = append(dao.Funcs, f)
 	}
 
@@ -205,7 +226,7 @@ func GenDAO(dalgen *DalgenConfig, schema *TableSchema) {
 	// fmt.Println(t.Name())
 	// b := bytes.Buffer{}
 	t.Execute(&buf, dao)
-	err := ioutil.WriteFile(fmt.Sprintf("./%s/dao/%s_dao.go", dalgen.FilePath, schema.Name), buf.Bytes(), 0666)
+	err := ioutil.WriteFile(fmt.Sprintf("./%s/dao/mysql_dao/%s_dao.go", dalgen.FilePath, schema.Name), buf.Bytes(), 0666)
 	if err != nil {
 		glog.Fatal("GenDAO error: ", err)
 	}
