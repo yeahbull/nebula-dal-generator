@@ -26,4 +26,18 @@
         </sql>
     </operation>
 
+    <operation name="SelectByPts" result_set="map">
+        <params>
+            <param name="user_id" type="int32" />
+            <param name="pts" type="int32" />
+        </params>
+        <sql>
+            SELECT
+            id, user_id, peer_type, peer_id, random_id, message, date2
+            FROM
+            messages
+            WHERE
+            id IN (SELECT message_id FROM message_boxs WHERE user_id = :user_id AND pts > :pts)
+        </sql>
+    </operation>
 </table>

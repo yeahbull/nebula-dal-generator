@@ -140,6 +140,8 @@ func GenDAO(dalgen *DalgenConfig, schema *TableSchema) {
 		case *sqlparser.Select:
 			if v.ResultSet == "list" {
 				f.QueryType = "SELECT_STRUCT_LIST"
+			} else if v.ResultSet == "map"{
+				f.QueryType = "SELECT_STRUCT_MAP"
 			} else {
 				f.QueryType = "SELECT_STRUCT_SINGLE"
 			}

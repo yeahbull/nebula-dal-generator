@@ -37,6 +37,7 @@ const (
 	RESULT_SET_DEFAULT = ""
 	RESULT_SET_ONE     = "single"
 	RESULT_SET_LIST    = "list"
+	RESULT_SET_MAP     = "map"
 )
 
 const (
