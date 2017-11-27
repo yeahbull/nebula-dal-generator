@@ -33,10 +33,10 @@ func NewMessagesDAO(db *sqlx.DB) *MessagesDAO {
 	return &MessagesDAO{db}
 }
 
-// insert into messages(user_id, peer_type, peer_id, random_id, message, `date`, created_at) values (:user_id, :peer_type, :peer_id, :random_id, :message, :date, :created_at)
+// insert into messages(user_id, peer_type, peer_id, random_id, message, date2, created_at) values (:user_id, :peer_type, :peer_id, :random_id, :message, :date2, :created_at)
 // TODO(@benqi): sqlmap
 func (dao *MessagesDAO) Insert(do *dataobject.MessagesDO) int64 {
-	var query = "insert into messages(user_id, peer_type, peer_id, random_id, message, `date`, created_at) values (:user_id, :peer_type, :peer_id, :random_id, :message, :date, :created_at)"
+	var query = "insert into messages(user_id, peer_type, peer_id, random_id, message, date2, created_at) values (:user_id, :peer_type, :peer_id, :random_id, :message, :date2, :created_at)"
 	r, err := dao.db.NamedExec(query, do)
 	if err != nil {
 		errDesc := fmt.Sprintf("NamedExec in Insert(%v), error: %v", do, err)
@@ -53,10 +53,10 @@ func (dao *MessagesDAO) Insert(do *dataobject.MessagesDO) int64 {
 	return id
 }
 
-// select id, user_id, peer_type, peer_id, random_id, message, `date` from messages where id in (:idList)
+// select id, user_id, peer_type, peer_id, random_id, message, date2 from messages where id in (:idList)
 // TODO(@benqi): sqlmap
 func (dao *MessagesDAO) SelectByIdList(idList []int32) []dataobject.MessagesDO {
-	var q = "select id, user_id, peer_type, peer_id, random_id, message, `date` from messages where id in (?)"
+	var q = "select id, user_id, peer_type, peer_id, random_id, message, date2 from messages where id in (?)"
 	query, a, err := sqlx.In(q, idList)
 	rows, err := dao.db.Queryx(query, a...)
 
@@ -85,10 +85,10 @@ func (dao *MessagesDAO) SelectByIdList(idList []int32) []dataobject.MessagesDO {
 	return values
 }
 
-// select id, user_id, peer_type, peer_id, random_id, message, `date` from messages where peer_type = :peer_type and (user_id = :user_id and peer_id = :peer_id) or (user_id = :peer_id and peer_id = :user_id)
+// select id, user_id, peer_type, peer_id, random_id, message, date2 from messages where peer_type = :peer_type and (user_id = :user_id and peer_id = :peer_id) or (user_id = :peer_id and peer_id = :user_id)
 // TODO(@benqi): sqlmap
 func (dao *MessagesDAO) SelectByUserIdAndPeer(peer_type int32, user_id int32, peer_id int32) []dataobject.MessagesDO {
-	var query = "select id, user_id, peer_type, peer_id, random_id, message, `date` from messages where peer_type = ? and (user_id = ? and peer_id = ?) or (user_id = ? and peer_id = ?)"
+	var query = "select id, user_id, peer_type, peer_id, random_id, message, date2 from messages where peer_type = ? and (user_id = ? and peer_id = ?) or (user_id = ? and peer_id = ?)"
 	rows, err := dao.db.Queryx(query, peer_type, user_id, peer_id, peer_id, user_id)
 
 	if err != nil {

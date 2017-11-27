@@ -217,7 +217,7 @@ func GenDAO(dalgen *DalgenConfig, schema *TableSchema) {
 				}
 			}
 		}
-		fmt.Printf("Process - func: [%s], query: [%s]\n", f.FuncName, f.Sql)
+		// fmt.Printf("Process - func: [%s], query: [%s]\n", f.FuncName, f.Sql)
 		dao.Funcs = append(dao.Funcs, f)
 	}
 

@@ -2,7 +2,7 @@
 <table sqlname="messages">
     <operation name="Insert">
         <sql>
-            INSERT INTO messages (user_id, peer_type, peer_id, random_id, message, date, created_at) VALUES (:user_id, :peer_type, :peer_id, :random_id, :message, :date, :created_at)
+            INSERT INTO messages (user_id, peer_type, peer_id, random_id, message, date2, created_at) VALUES (:user_id, :peer_type, :peer_id, :random_id, :message, :date2, :created_at)
         </sql>
     </operation>
 
@@ -11,14 +11,14 @@
             <param name="idList" type="[]int32" />
         </params>
         <sql>
-            SELECT id, user_id, peer_type, peer_id, random_id, message, date FROM messages WHERE id IN (:idList)
+            SELECT id, user_id, peer_type, peer_id, random_id, message, date2 FROM messages WHERE id IN (:idList)
         </sql>
     </operation>
 
     <operation name="SelectByUserIdAndPeer" result_set="list">
         <sql>
             SELECT
-            id, user_id, peer_type, peer_id, random_id, message, date
+            id, user_id, peer_type, peer_id, random_id, message, date2
             FROM
             messages
             WHERE

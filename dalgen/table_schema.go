@@ -118,7 +118,7 @@ func NewTableSchema(db *sqlx.DB, dalgen *DalgenConfig) (*TableSchema, error) {
 	t.Comment = comment
 	t.Fields = fields
 
-	// log.Println(t)
+	// log.Println("t ==> ", t)
 
 	return t, err
 }
@@ -139,6 +139,8 @@ func ToGoType(name string) (t string) {
 	idx := strings.Index(name, "(")
 	if idx > 0 {
 		s = name[:idx]
+	} else {
+		s = name
 	}
 
 	switch s {
@@ -152,6 +154,11 @@ func ToGoType(name string) (t string) {
 		t = "string"
 	case "timestamp":
 		t = "string"
+	case "text":
+		t = "string"
+	case "blob":
+		// fmt.Println("s ==> ", s)
+		t = "[]byte"
 	default:
 		t = "string"
 	}
