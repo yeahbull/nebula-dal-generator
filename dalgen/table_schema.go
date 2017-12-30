@@ -157,11 +157,11 @@ func ToGoType(name string) (t string) {
 	case "text":
 		t = "string"
 	case "blob":
-		// fmt.Println("s ==> ", s)
+		t = "[]byte"
+	case "mediumblob":
 		t = "[]byte"
 	default:
 		t = "string"
 	}
-
 	return t
 }
